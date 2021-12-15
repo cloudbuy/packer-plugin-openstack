@@ -3,6 +3,7 @@ package openstack
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v3/volumes"
 	"github.com/hashicorp/packer-plugin-sdk/multistep"
@@ -83,7 +84,9 @@ func (s *StepCreateVolume) Run(ctx context.Context, state multistep.StateBag) mu
 	}
 
 	// Volume was created, so remember to clean it up.
-	s.doCleanup = true
+	if _, ok := os.LookupEnv("PACKER_SKIP_VOLUME_CLEANUP"); !ok {
+		s.doCleanup = true
+	}
 
 	// Set the Volume ID in the state.
 	ui.Message(fmt.Sprintf("Volume ID: %s", volume.ID))
